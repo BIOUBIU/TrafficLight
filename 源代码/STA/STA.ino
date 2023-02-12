@@ -8,7 +8,8 @@
   Version/版本：v0.1
 
   使用的非Arduino官方库和非ESP8266库:
-  1.LedControl库：https://github.com/wayoda/LedControl
+  1.u8g2库
+  2.ESPAsyncUDP
 
   Copyright (C) 2023 杨昊峥
 
