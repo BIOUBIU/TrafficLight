@@ -29,27 +29,14 @@
 #include <Wire.h>
 #include "ESPAsyncUDP.h"
 #include <cstring>
-#include <SPI.h>
 
-//#define SCL 5
-//#define SDA 4
-#define D0 5
-#define D1 4
-#define D2 0
-#define D3 2
-#define D4 14
-#define D5 12
-#define D6 13
-#define D7 15
-#define ENABLE 1
-#define DC 6
-#define RESET 7
+#define SCL 5
+#define SDA 4
 
 #define MAX_CROSSROADS_NUM 3
-#include <Arduino.h>
 
-//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R0,D8);
-U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 13, /* CS=*/ 15);
+U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /*clock=*/SCL, /*data=*/SDA, /*reset=*/U8X8_PIN_NONE);   
+
 ESP8266WiFiMulti WiFiMulti;
 
 AsyncUDP udp;
@@ -102,7 +89,6 @@ void connectWiFi()
     u8g2.clearBuffer();
     u8g2.drawStr(0, 15, "Searching for");
     u8g2.drawStr(0, 30, " AP...");
-    u8g2.drawStr(0, 45, "   <STAND BY>");
     u8g2.sendBuffer();
   }
   u8g2.clear();
@@ -135,8 +121,8 @@ void enterReconn()
   u8g2.setFont(u8g2_font_unifont_t_symbols);
   u8g2.clear();
   u8g2.drawStr(0, 15, "AP disconnected.");
-  u8g2.drawStr(0, 45, "   <STAND BY>");
-  //u8g2.drawStr(0, 45, "connect mode...");
+  u8g2.drawStr(0, 30, "Entering");
+  u8g2.drawStr(0, 45, "connect mode...");
   u8g2.sendBuffer();
   delay(1000);
   connectWiFi();

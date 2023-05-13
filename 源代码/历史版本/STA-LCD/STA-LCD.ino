@@ -8,8 +8,7 @@
   Version/版本：v0.1
 
   使用的非Arduino官方库和非ESP8266库:
-  1.u8g2库
-  2.ESPAsyncUDP
+  1.LedControl库：https://github.com/wayoda/LedControl
 
   Copyright (C) 2023 杨昊峥
 
@@ -30,14 +29,28 @@
 #include <Wire.h>
 #include "ESPAsyncUDP.h"
 #include <cstring>
+#include <SPI.h>
 
-#define SCL 5
-#define SDA 4
+//#define SCL 5
+//#define SDA 4
+#define D0 5
+#define D1 4
+#define D2 0
+#define D3 2
+#define D4 14
+#define D5 12
+#define D6 13
+#define D7 15
+#define ENABLE 1
+#define DC 6
+#define RESET 7
 
 #define MAX_CROSSROADS_NUM 3
+#include <Arduino.h>
 
-U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /*clock=*/SCL, /*data=*/SDA, /*reset=*/U8X8_PIN_NONE);   
-
+//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R0,15);
+U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 13, /* CS=*/ 15);
+//U8G2_ST7567_JLX12864_F_4W_HW_SPI u8g2(U8G2_R2, 5, 4,1);
 ESP8266WiFiMulti WiFiMulti;
 
 AsyncUDP udp;
@@ -59,11 +72,6 @@ char RXPacket[13];
 void onPacketCallBack(AsyncUDPPacket packet)  //收包后的回调函数；
 {
   memcpy(RXPacket, packet.data(), sizeof(RXPacket));
-  for(int i = 0; i <= 12; i++)/////////////////////////////////////////////////
-  {
-    Serial.print(RXPacket[i]);
-  }
-  Serial.println("");
 }
 
 void judgeDir()
@@ -90,8 +98,17 @@ void connectWiFi()
     u8g2.clearBuffer();
     u8g2.drawStr(0, 15, "Searching for");
     u8g2.drawStr(0, 30, " AP...");
+    u8g2.drawStr(0, 45, "   <STAND BY>");
     u8g2.sendBuffer();
   }
+  /*do {
+  u8g2.clearBuffer();
+  u8g2.drawStr(0, 15, "Searching for");
+  u8g2.drawStr(0, 30, " AP...");
+  u8g2.drawStr(0, 45, "   <STAND BY>");
+  u8g2.sendBuffer();
+  }while (WiFiMulti.run() != WL_CONNECTED);
+  */
   u8g2.clear();
   u8g2.drawStr(0, 15, "Connected to:");
   u8g2.drawStr(0, 30, WiFi.SSID().c_str());
@@ -122,16 +139,16 @@ void enterReconn()
   u8g2.setFont(u8g2_font_unifont_t_symbols);
   u8g2.clear();
   u8g2.drawStr(0, 15, "AP disconnected.");
-  u8g2.drawStr(0, 30, "Entering");
-  u8g2.drawStr(0, 45, "connect mode...");
+  u8g2.drawStr(0, 45, "   <STAND BY>");
+  //u8g2.drawStr(0, 45, "connect mode...");
   u8g2.sendBuffer();
-  delay(1000);
+  //delay(1000);
   connectWiFi();
 }
 
 void setup()
 {
-  Serial.begin(9600);/////////////////////////////////////////////////////////////////////////
+  //Serial.begin(9600);/////////////////////////////////////////////////////////////////////////
   u8g2.begin();
   u8g2.enableUTF8Print(); // enable UTF8 support for the Arduino print() function
   u8g2.setFont(u8g2_font_unifont_t_symbols);
@@ -156,7 +173,7 @@ void LeftRed2Buffer()
 
 void LeftYellow2Buffer()
 {
-  Serial.println("Start draw Lyellow");  ///////////////////////////////////
+  //Serial.println("Start draw Lyellow");  ///////////////////////////////////
   u8g2.drawLine(30, 16, 42, 4);
   u8g2.drawLine(42, 4, 42, 10);
   u8g2.drawLine(42, 10, 60, 10);
@@ -164,7 +181,7 @@ void LeftYellow2Buffer()
   u8g2.drawLine(60, 22, 42, 22);
   u8g2.drawLine(42, 22, 42, 28);
   u8g2.drawLine(42, 28, 30, 16);
-  Serial.println("End draw Lyellow");  ///////////////////////////////////
+  //Serial.println("End draw Lyellow");  ///////////////////////////////////
 }
 
 void RightGreen2Buffer()
@@ -184,7 +201,7 @@ void RightRed2Buffer()
 
 void RightYellow2Buffer()
 {
-  Serial.println("Start draw Ryellow"); /////////////////////////////////////
+  //Serial.println("Start draw Ryellow"); /////////////////////////////////////
   u8g2.drawLine(45, 36, 55, 46);
   u8g2.drawLine(55, 46, 50, 46);
   u8g2.drawLine(50, 46, 50, 61);
@@ -192,7 +209,7 @@ void RightYellow2Buffer()
   u8g2.drawLine(40, 61, 40, 46);
   u8g2.drawLine(40, 46, 35, 46);
   u8g2.drawLine(35, 46, 45, 36);
-  Serial.println("End draw Ryellow"); ////////////////////////////////////
+  //Serial.println("End draw Ryellow"); ////////////////////////////////////
 }
 
 void LeftNum2Buffer0()
