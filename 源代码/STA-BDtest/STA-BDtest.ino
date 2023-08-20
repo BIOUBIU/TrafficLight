@@ -18,8 +18,9 @@ TaskHandle_t taskBeidou;
 TaskHandle_t taskMain;
 
 //初始化软串口对象
-SoftwareSerial bdrnSerial(18, 19);   // 第一个参数为RX，第二个为TX。这里单片机仅用到接收，RX与北斗模块的输出接口连接
-U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 13, /* CS=*/ 15);
+//SoftwareSerial Serial2(18, 19);   // 第一个参数为RX，第二个为TX。这里单片机仅用到接收，RX与北斗模块的输出接口连接
+//U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 13, /* CS=*/ 15);
+U8G2_ST7567_JLX12864_F_4W_SW_SPI u8g2(U8G2_R2,/*CLK*/25,/*DATA*/26,/*CS*/27,/*RS*/32,/*RST*/33);
 AsyncUDP udp;
 
 char RXPacket[13];
@@ -34,6 +35,7 @@ int currentAzi;
 int mode = 0;          //0-->广告，1-->路口，2-->报站；
 int currentCrossing = -1, currentStation = -1;
 
+int rollx = 0;    //滚动位置
 
 //存储路口信息结构体
 struct crossroad
@@ -201,11 +203,11 @@ void taskBeidouCode(void * parameter)
 {
   for(;;)
   {
-    while (bdrnSerial.available()) 
+    while (Serial2.available()) 
     { // 软串监听，当收到数据时，读取数值并处理
 
       char recvMsg[30];
-      size_t len = bdrnSerial.readBytesUntil('\n', recvMsg, 30);
+      size_t len = Serial2.readBytesUntil('\n', recvMsg, 30);
       memset(msgStr, 0, 30);
       strncpy(msgStr, recvMsg, len-1); // 复制除标识符外的字符串，后续会使用strsep进行破坏性解析
 
@@ -447,12 +449,12 @@ void judgeDir()
   dir0max = crossing[currentCrossing].dir0Azimuth + AZI_SHIFT;
   dir1min = crossing[currentCrossing].dir1Azimuth - AZI_SHIFT;
   dir1max = crossing[currentCrossing].dir1Azimuth + AZI_SHIFT;
-  if(unsignedAzi >= dir0min && unsignedAzi <= dir0max || unsignedAzi >= dir0min + 180 && unsignedAzi <= dir0max + 180)
+  if((unsignedAzi >= dir0min && unsignedAzi <= dir0max) || (unsignedAzi >= dir0min + 180 && unsignedAzi <= dir0max + 180))
   {
     dir = 0;
     return;
   }
-  if(unsignedAzi >= dir1min && unsignedAzi <= dir1max || unsignedAzi >= dir1min + 180 && unsignedAzi <= dir1max + 180)
+  if((unsignedAzi >= dir1min && unsignedAzi <= dir1max) || (unsignedAzi >= dir1min + 180 && unsignedAzi <= dir1max + 180))
   {
     dir = 1;
     return;
@@ -644,11 +646,11 @@ void printPacket()
   delay(50);
 }
 
-int rollx = 0;    //滚动位置
+
 void displaySta()   //显示站台信息
 {
-  clearNumArea()
-  u8g2.drawStr(0, 15, "Arriving at:")
+  clearNumArea();
+  u8g2.drawStr(0, 15, "Arriving at:");
   u8g2.drawStr(rollx, 30, sta[currentStation].name);
   u8g2.drawStr(rollx - 256, 30, sta[currentStation].name);
   u8g2.sendBuffer();
@@ -694,10 +696,12 @@ void taskMainCode(void * parameter)
 
 void setup()
 {
-  xTaskCreatePinnedToCore(taskBeidouCode, "taskBeidou", 10000, NULL, 1, &taskBeidou, 0);
-  xTaskCreatePinnedToCore(taskMainCode, "taskMain", 10000, NULL, 1, &taskMain, 1);
+  //xTaskCreatePinnedToCore(taskBeidouCode, "taskBeidou", 10000, NULL, 1, &taskBeidou, 0);
+  //xTaskCreatePinnedToCore(taskMainCode, "taskMain", 10000, NULL, 1, &taskMain, 1);
   // 串口初始化
-  bdrnSerial.begin(9600);
+  displayAd();
+  Serial.begin(9600);
+  Serial2.begin(9600);
   u8g2.begin();
   u8g2.enableUTF8Print();
   u8g2.setFont(u8g2_font_unifont_t_symbols);
