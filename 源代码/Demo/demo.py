@@ -4,7 +4,7 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 
 # 创建串口对象
-ser = serial.Serial('COM9', 9600)  # 将COM1替换为你的串口号和波特率
+ser = serial.Serial('COM14', 9600)  # 将COM1替换为你的串口号和波特率
 
 # 创建主窗口
 window = tk.Tk()
@@ -33,16 +33,16 @@ def send_message(message):
 
 def showText(mes):
     if(mes == 'A'):
-        text_box.insert(tk.END, f"已发送: 0111111\n")
+        text_box.insert(tk.END, f"已发送: 123.4527253,41.841248,08:18:28,2021-10-21,16:18:28,2021-10-21,1,180,58\r\n")
         text_box.see(tk.END)  # 滚动到文本框的最后一行
     elif(mes == 'B'):
-        text_box.insert(tk.END, f"已发送: 0222222\n")
+        text_box.insert(tk.END, f"已发送: 123.4527145,41.840816,08:18:28,2021-10-21,16:18:28,2021-10-21,1,180,58\r\n")
         text_box.see(tk.END)  # 滚动到文本框的最后一行
     elif(mes == 'C'):
-        text_box.insert(tk.END, f"已发送: 0333333\n")
+        text_box.insert(tk.END, f"已发送: 123.4527145,41.840816,08:18:28,2021-10-21,16:18:28,2021-10-21,1,270,58\r\n")
         text_box.see(tk.END)  # 滚动到文本框的最后一行
     elif(mes == 'D'):
-        text_box.insert(tk.END, f"已发送: 0444444\n")
+        text_box.insert(tk.END, f"已发送: 123.4513144,41.840764,08:18:28,2021-10-21,16:18:28,2021-10-21,1,270,58\r\n")
         text_box.see(tk.END)  # 滚动到文本框的最后一行
     else:
         return
